@@ -3,7 +3,7 @@ name = "wasted"
 version = "0.3.4"
 edition = "2024"
 license = "GPL-3.0-only"
-description = "Wasted - lightweight YouTube Music client (fork of ytm-rs)"
+description = "Wasted - lightweight YouTube Music client"
 
 [dependencies]
 anyhow = "1.0.104"
@@ -119,14 +119,14 @@ egui_system_font_provider = "0.37.0"
 [build-dependencies]
 winresource = "0.1.31"
 
-# egui's text layout with one change for right-to-left text (#141): see the ytm-rs notes
+# egui's text layout with one change for right-to-left text (#141): see the notes
 # in vendor/epaint/src/text/text_layout.rs.
 # souvlaki with its Linux media controls sending changes as they happen, not one a
-# second (#144): see the ytm-rs notes in vendor/souvlaki/src/platform/mpris/dbus/controls.rs.
+# second (#144): see the notes in vendor/souvlaki/src/platform/mpris/dbus/controls.rs.
 # winit with X11 windows taking a scale that changes after they open (#208) and Windows
 # throttling move repaints (~30 fps) and skipping duplicate resize paints in the size/move
 # loop so dragging and resizing run at the monitor's refresh rate without freezing video:
-# see the ytm-rs notes in vendor/winit/src/platform_impl/linux/x11/window.rs and
+# see the notes in vendor/winit/src/platform_impl/linux/x11/window.rs and
 # vendor/winit/src/platform_impl/windows/event_loop.rs.
 [patch.crates-io]
 epaint = { path = "vendor/epaint" }
