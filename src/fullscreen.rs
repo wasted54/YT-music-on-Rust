@@ -1,0 +1,260 @@
+//! Full screen on Windows, in one step. winit takes the title bar off first and
+//! resizes the window afterwards; in between Windows paints the frame unthemed (the
+//! old Windows 7 look) and the new area black until the app draws a frame at the new
+//! size. Here the style and size change together with painting held off.
+//!
+//! The window is also made one pixel taller than the monitor: graphics drivers treat
+//! an OpenGL window that exactly covers it as exclusive full screen, and blank the
+//! whole screen for a frame each time they switch in or out of that mode.
+
+/// The main window, from `main`.
+#[cfg_attr(not(windows), allow(unused_variables))]
+pub fn set_hwnd(hwnd: *mut std::ffi::c_void) {
+    #[cfg(windows)]
+    imp::init(hwnd as usize);
+}
+
+/// Enter or leave full screen. False when this platform (or a missing window handle)
+/// leaves it to winit.
+pub fn set(on: bool) -> bool {
+    #[cfg(windows)]
+    return imp::set(on);
+    #[cfg(not(windows))]
+    {
+        let _ = on;
+        false
+    }
+}
+
+/// The work area (the monitor less the taskbar) of the monitor the window is on, in
+/// physical pixels. None where the app can't ask (not Windows, no window handle yet).
+pub fn work_area() -> Option<egui::Rect> {
+    #[cfg(windows)]
+    return imp::work_area();
+    #[cfg(not(windows))]
+    None
+}
+
+/// The refresh rate (Hz) of the monitor the window is on. None where the app can't ask.
+pub fn refresh_rate() -> Option<f64> {
+    #[cfg(windows)]
+    return imp::refresh_rate();
+    #[cfg(not(windows))]
+    None
+}
+
+/// Clip the window to a rounded rectangle (left, top, right and bottom edges and corner
+/// diameter, in pixels from the window's corner), or back to all of it. Outside the
+/// shape Windows neither draws its frame nor gives the window the mouse. Nothing where
+/// windows have no such frame.
+pub fn set_window_shape(shape: Option<(i32, i32, i32, i32, i32)>) {
+    #[cfg(windows)]
+    imp::set_window_shape(shape);
+    #[cfg(not(windows))]
+    let _ = shape;
+}
+
+/// Move the window's corner to `x`, `y` (pixels) now, not after the frame the way eframe
+/// does: with its shape set in the same frame, what's drawn moves with it.
+pub fn move_window(x: i32, y: i32) {
+    #[cfg(windows)]
+    imp::move_window(x, y);
+    #[cfg(not(windows))]
+    let _ = (x, y);
+}
+
+/// How the window starts the system's move (winit's, which also lets go of the button
+/// afterwards), from `main`.
+pub fn set_drag(start: impl Fn() -> bool + Send + Sync + 'static) {
+    #[cfg(windows)]
+    imp::set_drag(Box::new(start));
+    #[cfg(not(windows))]
+    let _ = start;
+}
+
+/// Hand the window to the system to move, pressed at `from` (pixels from the window's
+/// drawing area's corner). The move is only recognized once the pointer has gone some way,
+/// a long way on a quick flick, and the system's move keeps whatever gap there is then: the
+/// window first catches up. False where the app can't (it's then up to eframe).
+pub fn start_drag(from: (i32, i32)) -> bool {
+    #[cfg(windows)]
+    return imp::start_drag(from);
+    #[cfg(not(windows))]
+    {
+        let _ = from;
+        false
+    }
+}
+
+/// Whether some of `rect` (physical pixels) is on a connected monitor. True where the
+/// app can't ask.
+pub fn on_a_monitor(rect: egui::Rect) -> bool {
+    #[cfg(windows)]
+    return imp::on_a_monitor(rect);
+    #[cfg(not(windows))]
+    {
+        let _ = rect;
+        true
+    }
+}
+
+#[cfg(windows)]
+mod imp {
+    use std::sync::{Mutex, OnceLock};
+
+    use windows::Win32::Foundation::{HWND, LPARAM, RECT, WPARAM};
+    use windows::Win32::Graphics::Gdi::{
+        DEVMODEW, ENUM_CURRENT_SETTINGS, EnumDisplaySettingsW, GetMonitorInfoW, MONITOR_DEFAULTTONEAREST, MONITOR_DEFAULTTONULL, MONITORINFO, MONITORINFOEXW, MonitorFromRect,
+        MonitorFromWindow, RDW_ALLCHILDREN, RDW_ERASE, RDW_FRAME, RDW_INVALIDATE, RedrawWindow,
+    };
+    use windows::core::PCWSTR;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        GWL_EXSTYLE, GWL_STYLE, GetWindowLongW, GetWindowPlacement, IsZoomed, SW_RESTORE, ShowWindow, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOCOPYBITS, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER,
+        SendMessageW, SetWindowLongW, SetWindowPlacement, SetWindowPos, WINDOWPLACEMENT, WM_SETREDRAW, WS_CAPTION, WS_EX_CLIENTEDGE,
+        WS_EX_DLGMODALFRAME, WS_EX_STATICEDGE, WS_EX_WINDOWEDGE, WS_MAXIMIZE, WS_THICKFRAME,
+    };
+
+    static WINDOW: OnceLock<usize> = OnceLock::new();
+
+    /// The window's style and placement from before full screen.
+    struct Saved {
+        style: i32,
+        ex_style: i32,
+        placement: WINDOWPLACEMENT,
+    }
+
+    // SAFETY: plain data; only touched on the UI thread, under the mutex.
+    unsafe impl Send for Saved {}
+
+    static SAVED: Mutex<Option<Saved>> = Mutex::new(None);
+
+    /// The window keeps winit's class without a background brush. With one, Windows
+    /// erased the whole window to it at every repaint, over the OpenGL frame the app had
+    /// just shown and until the next: it flashed while resized (#100). Vulkan's frames
+    /// don't go through that window surface, so they never did.
+    pub fn init(hwnd: usize) {
+        let _ = WINDOW.set(hwnd);
+    }
+
+    pub fn work_area() -> Option<egui::Rect> {
+        let &h = WINDOW.get()?;
+        let mut info = MONITORINFO { cbSize: size_of::<MONITORINFO>() as u32, ..Default::default() };
+        // SAFETY: the app's own window; `info` is ours and sized.
+        unsafe { GetMonitorInfoW(MonitorFromWindow(HWND(h as *mut _), MONITOR_DEFAULTTONEAREST), &mut info) }.as_bool().then(|| {
+            let r = info.rcWork;
+            egui::Rect::from_min_max(egui::pos2(r.left as f32, r.top as f32), egui::pos2(r.right as f32, r.bottom as f32))
+        })
+    }
+
+    pub fn set_window_shape(shape: Option<(i32, i32, i32, i32, i32)>) {
+        use windows::Win32::Graphics::Gdi::{CreateRoundRectRgn, SetWindowRgn};
+        let Some(&h) = WINDOW.get() else { return };
+        // SAFETY: the app's own window; once set, the system owns the region.
+        unsafe {
+            let region = shape.map(|(left, top, right, bottom, d)| CreateRoundRectRgn(left, top, right + 1, bottom + 1, d, d));
+            SetWindowRgn(HWND(h as *mut _), region, true);
+        }
+    }
+
+    pub fn move_window(x: i32, y: i32) {
+        let Some(&h) = WINDOW.get() else { return };
+        // SAFETY: the app's own window.
+        unsafe {
+            let _ = SetWindowPos(HWND(h as *mut _), None, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+    }
+
+    static DRAG: OnceLock<Box<dyn Fn() -> bool + Send + Sync>> = OnceLock::new();
+
+    pub fn set_drag(start: Box<dyn Fn() -> bool + Send + Sync>) {
+        let _ = DRAG.set(start);
+    }
+
+    pub fn start_drag((x, y): (i32, i32)) -> bool {
+        use windows::Win32::Foundation::POINT;
+        use windows::Win32::Graphics::Gdi::ClientToScreen;
+        use windows::Win32::UI::WindowsAndMessaging::{GetCursorPos, GetWindowRect};
+        let (Some(&h), Some(start)) = (WINDOW.get(), DRAG.get()) else { return false };
+        let hwnd = HWND(h as *mut _);
+        let (mut pressed, mut cursor, mut r) = (POINT { x, y }, POINT::default(), RECT::default());
+        // SAFETY: the app's own window, on its UI thread; every struct passed is ours.
+        unsafe {
+            if !ClientToScreen(hwnd, &mut pressed).as_bool() || GetCursorPos(&mut cursor).is_err() || GetWindowRect(hwnd, &mut r).is_err() {
+                return false;
+            }
+            // winit only posts the system's move, so this still comes first. Maximized, the
+            // system puts the window back to its size under the pointer itself.
+            if !start() {
+                return false;
+            }
+            if !IsZoomed(hwnd).as_bool() {
+                let _ = SetWindowPos(hwnd, None, r.left + cursor.x - pressed.x, r.top + cursor.y - pressed.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+        }
+        true
+    }
+
+    pub fn refresh_rate() -> Option<f64> {
+        let &h = WINDOW.get()?;
+        let mut info = MONITORINFOEXW { monitorInfo: MONITORINFO { cbSize: size_of::<MONITORINFOEXW>() as u32, ..Default::default() }, ..Default::default() };
+        let mut mode = DEVMODEW { dmSize: size_of::<DEVMODEW>() as u16, ..Default::default() };
+        // SAFETY: the app's own window; `info` and `mode` are ours and sized, and
+        // `szDevice` is a NUL-terminated name.
+        unsafe {
+            GetMonitorInfoW(MonitorFromWindow(HWND(h as *mut _), MONITOR_DEFAULTTONEAREST), (&raw mut info).cast()).ok().ok()?;
+            EnumDisplaySettingsW(PCWSTR(info.szDevice.as_ptr()), ENUM_CURRENT_SETTINGS, &mut mode).ok().ok()?;
+        }
+        // 0 and 1 mean the hardware's default rate, which says nothing.
+        (mode.dmDisplayFrequency > 1).then_some(mode.dmDisplayFrequency as f64)
+    }
+
+    pub fn on_a_monitor(rect: egui::Rect) -> bool {
+        let r = RECT { left: rect.left() as i32, top: rect.top() as i32, right: rect.right() as i32, bottom: rect.bottom() as i32 };
+        // SAFETY: plain query.
+        !unsafe { MonitorFromRect(&r, MONITOR_DEFAULTTONULL) }.is_invalid()
+    }
+
+    pub fn set(on: bool) -> bool {
+        let Some(&h) = WINDOW.get() else { return false };
+        let hwnd = HWND(h as *mut _);
+        let mut saved = SAVED.lock().unwrap();
+        if on == saved.is_some() {
+            return true;
+        }
+        // SAFETY: the app's own window, on its UI thread; every struct passed is ours.
+        unsafe {
+            SendMessageW(hwnd, WM_SETREDRAW, Some(WPARAM(0)), None);
+            if on {
+                let style = GetWindowLongW(hwnd, GWL_STYLE);
+                let ex_style = GetWindowLongW(hwnd, GWL_EXSTYLE);
+                let mut placement = WINDOWPLACEMENT { length: size_of::<WINDOWPLACEMENT>() as u32, ..Default::default() };
+                let _ = GetWindowPlacement(hwnd, &mut placement);
+                let mut info = MONITORINFO { cbSize: size_of::<MONITORINFO>() as u32, ..Default::default() };
+                let _ = GetMonitorInfoW(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &mut info);
+                let r = info.rcMonitor;
+                // winit keeps a maximized window without the system frame (the app's own
+                // title bar) to the work area, which would leave the taskbar's strip out:
+                // restore it first. The saved placement maximizes it again on the way out.
+                if IsZoomed(hwnd).as_bool() {
+                    let _ = ShowWindow(hwnd, SW_RESTORE);
+                }
+                SetWindowLongW(hwnd, GWL_STYLE, style & !((WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZE).0 as i32));
+                let edges = WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE;
+                SetWindowLongW(hwnd, GWL_EXSTYLE, ex_style & !(edges.0 as i32));
+                // No copying the old picture to its old spot: the app draws a frame at
+                // the new size.
+                let flags = SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED | SWP_NOCOPYBITS;
+                let _ = SetWindowPos(hwnd, None, r.left, r.top, r.right - r.left, r.bottom - r.top + 1, flags);
+                *saved = Some(Saved { style, ex_style, placement });
+            } else if let Some(s) = saved.take() {
+                SetWindowLongW(hwnd, GWL_STYLE, s.style);
+                SetWindowLongW(hwnd, GWL_EXSTYLE, s.ex_style);
+                let _ = SetWindowPlacement(hwnd, &s.placement);
+                let _ = SetWindowPos(hwnd, None, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+            }
+            SendMessageW(hwnd, WM_SETREDRAW, Some(WPARAM(1)), Some(LPARAM(0)));
+            let _ = RedrawWindow(Some(hwnd), None, None, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
+        }
+        true
+    }
+}

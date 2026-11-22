@@ -1,0 +1,4 @@
+This is the portable Wasted. While this file sits next to wasted.exe, the app keeps
+its settings and caches in the "data" folder here.
+
+Delete this file to use the normal location (%APPDATA%\Wasted) instead.

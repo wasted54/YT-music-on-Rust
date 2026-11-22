@@ -1,0 +1,34 @@
+name: Wasted portable (Windows)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install nasm (faster H.264)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          choco install nasm -y --no-progress
+          "C:\Program Files\NASM" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+      - run: cargo build --release
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory dist/Wasted | Out-Null
+          Copy-Item target/release/wasted.exe, installer/portable.txt, LICENSE dist/Wasted/
+          Compress-Archive dist/Wasted dist/Wasted-portable.zip
+      - uses: actions/upload-artifact@v4
+        with: { name: Wasted-portable, path: dist/Wasted-portable.zip }
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "build-${{ github.run_number }}" dist/Wasted-portable.zip --title "Wasted build ${{ github.run_number }}" --notes "Portable Windows build. Unzip and run wasted.exe."
