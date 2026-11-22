@@ -632,7 +632,7 @@ pub struct App {
     theme_id: String,
     /// Preset whose chrome (glass, corner radius) is installed in the egui style.
     chrome_applied: Option<String>,
-    /// Light or dark pages (the ytm-rs theme's; see `light_pages`).
+    /// Light or dark pages (the Wasted theme's; see `light_pages`).
     appearance: theme::Appearance,
     /// The theme's accent colour, the system's or the listener's own.
     accent_source: AccentSource,

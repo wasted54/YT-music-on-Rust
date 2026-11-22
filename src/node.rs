@@ -222,7 +222,7 @@ mod tests {
     #[test]
     #[ignore]
     fn node_fetch_into_the_data_folder() {
-        let dir = std::env::temp_dir().join("ytm-rs-node-fetch-test");
+        let dir = std::env::temp_dir().join("wasted-node-fetch-test");
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let rt = tokio::runtime::Runtime::new().unwrap();
@@ -280,7 +280,7 @@ mod tests {
                 let node = extract(&bytes, &format!("node-{version}-{}", build.platform), build.zip).unwrap();
                 println!("{file}: {:.1} MB download, node {:.1} MB", bytes.len() as f64 / 1e6, node.len() as f64 / 1e6);
                 if cfg!(windows) && build.zip {
-                    let dir = std::env::temp_dir().join("ytm-rs-node-test");
+                    let dir = std::env::temp_dir().join("wasted-node-test");
                     std::fs::create_dir_all(&dir).unwrap();
                     let exe = dir.join("node.exe");
                     std::fs::write(&exe, &node).unwrap();

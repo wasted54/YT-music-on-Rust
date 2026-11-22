@@ -406,7 +406,7 @@ impl Rtsp {
         self.cseq += 1;
         // Apple TVs answer a sender that doesn't call itself "AirPlay/…" (or "iTunes/…") with 403.
         let mut req = format!(
-            "{method} {} RTSP/1.0\r\nCSeq: {}\r\nUser-Agent: AirPlay/665.13.1 (ytm-rs/{})\r\nClient-Instance: {}\r\nDACP-ID: {}\r\nActive-Remote: {}\r\n",
+            "{method} {} RTSP/1.0\r\nCSeq: {}\r\nUser-Agent: AirPlay/665.13.1 (wasted/{})\r\nClient-Instance: {}\r\nDACP-ID: {}\r\nActive-Remote: {}\r\n",
             uri.unwrap_or(&self.url),
             self.cseq,
             env!("CARGO_PKG_VERSION"),

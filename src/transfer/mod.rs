@@ -1467,7 +1467,7 @@ mod live {
     #[tokio::test]
     #[ignore]
     async fn refusals_live() {
-        let dir = std::env::temp_dir().join("ytm-rs-refusals-test");
+        let dir = std::env::temp_dir().join("wasted-refusals-test");
         let api = crate::ytmapi::Api::new(&dir);
         let visitor = api.visitor_data(false).await.unwrap();
         let http = crate::proxy::http();
@@ -1514,7 +1514,7 @@ mod live {
         let tracks: Vec<super::Track> = serde_json::from_value(v["tracks"].clone()).unwrap();
         let tracks: Vec<super::Track> = tracks.into_iter().filter(|t| !t.local).skip(std::env::var("YTM_MATCH_SKIP").ok().and_then(|v| v.parse().ok()).unwrap_or(0)).take(n).collect();
         let _ = env_logger::builder().filter_level(log::LevelFilter::Warn).filter_module("ytm_rs::ytmapi", log::LevelFilter::Info).is_test(false).try_init();
-        let api = crate::ytmapi::Api::new(&std::env::temp_dir().join("ytm-rs-match-speed"));
+        let api = crate::ytmapi::Api::new(&std::env::temp_dir().join("wasted-match-speed"));
         assert!(api.account().is_none());
         let t0 = std::time::Instant::now();
         let results: Vec<_> = stream::iter(tracks.iter()).map(|t| super::search_song(&api, t)).buffer_unordered(std::env::var("YTM_CONC").ok().and_then(|v| v.parse().ok()).unwrap_or(super::SEARCHES)).collect().await;
@@ -1530,7 +1530,7 @@ mod live {
     #[tokio::test]
     #[ignore]
     async fn artist_thumbs_live() {
-        let dir = std::env::temp_dir().join("ytm-rs-thumbs-test");
+        let dir = std::env::temp_dir().join("wasted-thumbs-test");
         let api = crate::ytmapi::Api::new(&dir);
         for c in crate::ytm::search_cards(&api, "drake", crate::ytm::Filter::Artists, false).await.unwrap().iter().take(5) {
             println!("{}: {:?}", c.title, c.thumbs.iter().map(|t| format!("{}x{} {}", t.width, t.height, t.url)).collect::<Vec<_>>());
@@ -1722,7 +1722,7 @@ mod live {
     #[tokio::test]
     #[ignore]
     async fn matching_live() {
-        let dir = directories::ProjectDirs::from("", "", "ytm-rs").unwrap().data_dir().to_path_buf();
+        let dir = directories::ProjectDirs::from("", "", "wasted").unwrap().data_dir().to_path_buf();
         let api = crate::ytmapi::Api::new(&dir);
         assert!(api.account().is_some(), "not signed in");
         let songs: &[(&str, &[&str])] = &[

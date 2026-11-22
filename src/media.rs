@@ -101,7 +101,7 @@ impl Media {
         wake: impl Fn() + Send + Sync + 'static,
     ) -> Option<Self> {
         let wake: Arc<dyn Fn() + Send + Sync> = Arc::new(wake);
-        let config = PlatformConfig { display_name: "YT Music", dbus_name: "ytm_rs", desktop_entry: Some("ytm-rs"), hwnd };
+        let config = PlatformConfig { display_name: "Wasted", dbus_name: "ytm_rs", desktop_entry: Some("wasted"), hwnd };
         let mut controls = MediaControls::new(config)
             .map_err(|e| log::warn!("media controls unavailable: {e:?}"))
             .ok()?;

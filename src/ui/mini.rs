@@ -132,7 +132,7 @@ mod shape {
     fn restore_msg() -> u32 {
         static MSG: OnceLock<u32> = OnceLock::new();
         // SAFETY: a constant, NUL-terminated name.
-        *MSG.get_or_init(|| unsafe { RegisterWindowMessageW(w!("ytm-rs mini player restore")) })
+        *MSG.get_or_init(|| unsafe { RegisterWindowMessageW(w!("wasted mini player restore")) })
     }
 
     pub fn init(hwnd: *mut std::ffi::c_void) {

@@ -1,7 +1,7 @@
 {
   "id": "classic",
   "name": "Classic",
-  "creators": ["ytm-rs"],
+  "creators": ["Wasted"],
   "blurb": "Plain dark with red accents and no album-art colours.",
   "source": "ytm-rs",
   "accent": "#ff3048",

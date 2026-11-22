@@ -144,8 +144,8 @@ fn save_queue(st: &State) {
 
 fn metadata(l: &Listen) -> Value {
     let mut info = json!({
-        "media_player": "ytm-rs",
-        "submission_client": "ytm-rs",
+        "media_player": "wasted",
+        "submission_client": "wasted",
         "submission_client_version": env!("CARGO_PKG_VERSION"),
         "music_service": "music.youtube.com",
         "music_service_name": "YouTube Music",

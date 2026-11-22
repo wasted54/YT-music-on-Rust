@@ -552,7 +552,7 @@ mod tests {
 
     #[test]
     fn carries_over_and_forgets_an_older_versions_session() {
-        let dir = std::env::temp_dir().join(format!("ytm-rs-session-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("wasted-session-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let legacy = json!({
             "clients": {"desktop_music": {"data": {"version": "1.0"}}},

@@ -109,7 +109,7 @@ fn main() -> eframe::Result {
             return Ok(());
         }
     }
-    // A jam link (`ytm-rs://jam/CODE` or the https share link): hand it to the running
+    // A jam link (`wasted://jam/CODE` or the https share link): hand it to the running
     // instance if there is one, else join once this one is up. Before `init_logging`,
     // which would truncate the running instance's log file.
     if let Some(code) = deeplink::from_args() {
@@ -206,7 +206,7 @@ fn main() -> eframe::Result {
             theme::follow_system_scheme(wake);
             // Whether song notifications can show here (Windows: a Start menu entry).
             notify::look_up();
-            // Keep `ytm-rs:` links pointing at this copy; dev builds leave it alone
+            // Keep `Wasted:` links pointing at this copy; dev builds leave it alone
             // (even with YTM_UPDATE_FORCE).
             if update::installed() && !cfg!(debug_assertions) {
                 deeplink::register_protocol();

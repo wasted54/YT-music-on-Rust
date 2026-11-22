@@ -406,7 +406,7 @@ mod tests {
     #[ignore]
     async fn hls_stream_live() {
         use rodio::Source;
-        let api = crate::ytmapi::Api::new(&std::env::temp_dir().join("ytm-rs-hls-test"));
+        let api = crate::ytmapi::Api::new(&std::env::temp_dir().join("wasted-hls-test"));
         let vd = api.visitor_data(false).await.unwrap();
         let http = reqwest::Client::new();
         let s = crate::innertube::hls_audio(&http, "4RzTAS6njw4", &vd).await.unwrap();

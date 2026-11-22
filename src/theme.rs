@@ -225,7 +225,7 @@ impl FileTheme {
 pub fn theme_template(accent: Color32) -> String {
     let hex = |c: Color32| egui::ecolor::HexColor::Hex6(c).to_string();
     format!(
-        "# ytm-rs colours. One \"name = #rrggbb\" on each line.\n\
+        "# wasted colours. One \"name = #rrggbb\" on each line.\n\
          # Save the file and the app follows within a couple of seconds: no restart.\n\
          # Lines starting with # are ignored. Remove the # to use one.\n\
          \n\

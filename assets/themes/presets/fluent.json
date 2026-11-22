@@ -2,7 +2,7 @@
   "id": "fluent",
   "name": "Fluent",
   "creators": [
-    "ytm-rs"
+    "Wasted"
   ],
   "blurb": "Windows 11's Fluent look: Segoe UI Variable, your Windows accent colour, flat layered greys on a rounded sheet and small corners; now playing keeps a slow, calm cover backdrop.",
   "source": "WinUI 3 Fluent design (Microsoft)",

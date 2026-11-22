@@ -189,7 +189,7 @@ mod os {
     }
 
     pub struct Os {
-        /// Clicking the toast brings the window back, through the `ytm-rs:` link the
+        /// Clicking the toast brings the window back, through the `Wasted:` link the
         /// installed copy registers (a second launch hands over to the running one).
         launch: Option<&'static str>,
     }
@@ -197,7 +197,7 @@ mod os {
     impl Default for Os {
         fn default() -> Self {
             let linked = crate::update::installed() && !cfg!(debug_assertions);
-            Self { launch: linked.then_some("ytm-rs://show") }
+            Self { launch: linked.then_some("wasted://show") }
         }
     }
 
@@ -248,7 +248,7 @@ mod os {
             let body = if self.markup { super::xml_escape(&song.artist) } else { song.artist.clone() };
             let mut hints = PropMap::new();
             // Its icon and name, and a click on it opens the app.
-            hints.insert("desktop-entry".into(), Variant(Box::new("ytm-rs".to_owned())));
+            hints.insert("desktop-entry".into(), Variant(Box::new("wasted".to_owned())));
             hints.insert("suppress-sound".into(), Variant(Box::new(true)));
             hints.insert("urgency".into(), Variant(Box::new(0u8)));
             hints.insert("category".into(), Variant(Box::new("x-gnome.music".to_owned())));
@@ -292,8 +292,8 @@ mod tests {
     fn toast_links_back_and_shows_the_cover() {
         let cover = std::env::temp_dir().join("cover art.jpg");
         let song = Song { title: "T".into(), artist: "A".into(), cover: Some(cover) };
-        let xml = toast_xml(&song, Some("ytm-rs://show"));
-        assert!(xml.starts_with("<toast launch=\"ytm-rs://show\" activationType=\"protocol\">"), "{xml}");
+        let xml = toast_xml(&song, Some("wasted://show"));
+        assert!(xml.starts_with("<toast launch=\"wasted://show\" activationType=\"protocol\">"), "{xml}");
         assert!(xml.contains("placement=\"appLogoOverride\" src=\"file:///"), "{xml}");
         assert!(xml.contains("cover%20art.jpg"), "{xml}");
     }

@@ -73,12 +73,12 @@ struct State {
 static STATE: LazyLock<RwLock<State>> =
     LazyLock::new(|| RwLock::new(State { index: HashMap::new(), file: PathBuf::new(), folder: default_folder(), per_list: false, file_lyrics: FileLyrics::Synced, gone: HashSet::new(), saved: Vec::new() }));
 
-/// Music\ytm-rs.
+/// Music\Wasted.
 pub fn default_folder() -> PathBuf {
     let base = directories::UserDirs::new()
         .and_then(|u| u.audio_dir().map(Path::to_path_buf).or_else(|| Some(u.home_dir().join("Music"))))
         .unwrap_or_else(|| PathBuf::from("."));
-    base.join("ytm-rs")
+    base.join("wasted")
 }
 
 /// What a downloaded file's lyrics tag holds.
@@ -895,7 +895,7 @@ mod tests {
 
     #[test]
     fn each_list_gets_a_folder_of_its_own() {
-        let root = std::env::temp_dir().join(format!("ytm-rs-list-dir-test-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("wasted-list-dir-test-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir_all(&root).unwrap();
         let list = |id: &str, name: &str| ListFolder { id: id.into(), name: name.into() };
@@ -961,7 +961,7 @@ mod tests {
     /// Downloads takes on, in a folder of its own.
     #[test]
     fn saves_link_videos_and_are_taken_on() {
-        let dir = std::env::temp_dir().join(format!("ytm-rs-downloads-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("wasted-downloads-test-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         init(&dir, &dir.join("music").display().to_string(), false, FileLyrics::Synced);

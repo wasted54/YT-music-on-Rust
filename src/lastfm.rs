@@ -1,7 +1,7 @@
 //! Last.fm scrobbling: "now playing" when a song starts, and a scrobble once it has
 //! played half its length or 4 minutes (Last.fm's rule; songs under 30 s don't count).
 //!
-//! Sign-in is Last.fm's desktop flow: get a token, let the user allow ytm-rs in the
+//! Sign-in is Last.fm's desktop flow: get a token, let the user allow Wasted in the
 //! browser, then trade the token for a session key (kept in Credential Manager).
 //! Scrobbles that can't be sent (offline, Last.fm down) wait in `lastfm_queue.json`
 //! and go out with the next one.
@@ -73,7 +73,7 @@ pub fn sign_out() {
     crate::vault::delete(VAULT, &st.data_dir);
 }
 
-/// Ask the user to allow ytm-rs on last.fm (in their browser) and wait until they do.
+/// Ask the user to allow Wasted on last.fm (in their browser) and wait until they do.
 /// Returns the account name.
 pub async fn sign_in(http: &reqwest::Client) -> anyhow::Result<String> {
     let token = call(http, "auth.getToken", &[], None, false).await?;

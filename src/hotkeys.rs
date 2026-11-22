@@ -231,7 +231,7 @@ mod tests {
 
     #[test]
     fn bindings_round_trip_through_disk() {
-        let dir = std::env::temp_dir().join(format!("ytm-rs-hotkeys-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("wasted-hotkeys-{}", std::process::id()));
         let mut bindings = Bindings::default();
         bindings.set(Cmd::Next, HotKey::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyJ).into_string());
         bindings.save(&dir).unwrap();
@@ -241,7 +241,7 @@ mod tests {
 
     #[test]
     fn a_missing_file_gives_the_defaults() {
-        assert_eq!(Bindings::load(Path::new("no-such-folder-for-ytm-rs")), Bindings::default());
+        assert_eq!(Bindings::load(Path::new("no-such-folder-for-wasted")), Bindings::default());
     }
 
     #[test]

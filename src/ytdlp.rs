@@ -300,12 +300,12 @@ mod tests {
     #[test]
     #[ignore]
     fn ytdlp_and_quickjs_fetch() {
-        let dir = std::env::temp_dir().join("ytm-rs-ytdlp-fetch-test");
+        let dir = std::env::temp_dir().join("wasted-ytdlp-fetch-test");
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
-            let http = reqwest::Client::builder().user_agent("ytm-rs").build().unwrap();
+            let http = reqwest::Client::builder().user_agent("wasted").build().unwrap();
             for (name, repo, asset, flag) in [(BIN, REPO, ASSET, "--version"), (QJS, QJS_REPO, QJS_ASSET, "--help")] {
                 let bin = ensure(&http, &dir, name, repo, asset, MAX_AGE).await.unwrap();
                 let out = std::process::Command::new(&bin).arg(flag).output().unwrap();

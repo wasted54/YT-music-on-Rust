@@ -20,7 +20,7 @@ const CLIENT_ID: &str = "1521756469433991299";
 /// That application's name, unless the listener gives another.
 pub const APP_NAME: &str = "Youtube Music";
 
-/// ytm-rs's icon, from its website: the example song's artwork in Settings' preview.
+/// Wasted's icon, from its website: the example song's artwork in Settings' preview.
 pub const ICON: &str = "https://grapedjuice.github.io/ytm-rs/icon-192.png";
 
 const RETRY: Duration = Duration::from_secs(15);

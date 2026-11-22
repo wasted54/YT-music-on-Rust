@@ -3,7 +3,6 @@ name = "wasted"
 version = "0.3.4"
 edition = "2024"
 license = "GPL-3.0-only"
-repository = "https://github.com/grapedjuice/ytm-rs"
 description = "Wasted - lightweight YouTube Music client (fork of ytm-rs)"
 
 [dependencies]

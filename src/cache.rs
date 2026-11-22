@@ -155,12 +155,12 @@ mod tests {
 
     #[test]
     fn clears_the_cache_and_keeps_the_rest() {
-        let dir = std::env::temp_dir().join("ytm-rs-cache-test");
+        let dir = std::env::temp_dir().join("wasted-cache-test");
         let _ = std::fs::remove_dir_all(&dir);
         for (path, len) in [
             ("thumbs/a", 100),
             ("webview-lyrics/EBWebView/Default/Cookies", 50),
-            ("updates/ytm-rs-setup.exe", 1000),
+            ("updates/wasted-setup.exe", 1000),
             ("lyrics/song.lrc", 7),
             ("webview/Cookies", 9),
             ("app.ron", 3),
@@ -172,7 +172,7 @@ mod tests {
         }
         assert_eq!(size(&dir), 1150);
         assert_eq!(clear(&dir, true), 150);
-        assert!(dir.join("updates/ytm-rs-setup.exe").exists());
+        assert!(dir.join("updates/wasted-setup.exe").exists());
         assert!(dir.join("thumbs").is_dir() && !dir.join("thumbs/a").exists());
         assert!(!dir.join("webview-lyrics/EBWebView").exists());
         assert_eq!(clear(&dir, false), 1000);

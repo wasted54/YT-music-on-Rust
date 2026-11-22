@@ -98,7 +98,7 @@ impl App {
     /// The window's title, which the taskbar and Alt+Tab show: the current song, or the
     /// app's name with none. Named like a browser's picture in picture while the mini
     /// player is the video: Wayland lets no app put itself above others, but a KDE window
-    /// rule for that title (and the app, ytm-rs) can.
+    /// rule for that title (and the app, Wasted) can.
     pub(super) fn sync_title(&mut self, ctx: &egui::Context) {
         let want = if self.mini.active() && super::mini::video_active() {
             crate::tr!("player-pip").to_owned()

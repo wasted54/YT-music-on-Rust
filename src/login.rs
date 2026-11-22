@@ -4,7 +4,7 @@
 //! WKWebView on macOS, WebKitGTK on Linux), waits until the flow lands on the app's
 //! site, then hands the session cookies (HttpOnly ones included) to the app.
 //!
-//! The window runs in a child process (`ytm-rs --login <dir>`): tao and winit crash
+//! The window runs in a child process (`Wasted --login <dir>`): tao and winit crash
 //! when both pump windows in one process (STATUS_FATAL_USER_CALLBACK_EXCEPTION), and a
 //! separate process also returns all webview memory to the OS once sign-in ends.
 

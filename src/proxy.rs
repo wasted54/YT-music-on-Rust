@@ -1,4 +1,4 @@
-//! Settings › Network › Proxy. Everything ytm-rs fetches goes through one setting:
+//! Settings › Network › Proxy. Everything Wasted fetches goes through one setting:
 //! the API and song streams, lyrics, translation, updates, the Spotify transfer,
 //! yt-dlp, the sign-in windows and Listen together.
 //!
@@ -145,7 +145,7 @@ pub fn http() -> reqwest::Client {
 fn build_for(n: u32) -> reqwest::Client {
     let b = match (n, active().resolve()) {
         (1.., Some(mut p)) => {
-            let _ = p.set_username(&format!("ytm-rs-{n}"));
+            let _ = p.set_username(&format!("wasted-{n}"));
             let _ = p.set_password(Some("x"));
             reqwest::Proxy::all(p.as_str()).map_or_else(|_| apply(reqwest::Client::builder()), |p| reqwest::Client::builder().proxy(p))
         }
@@ -415,7 +415,7 @@ async fn socks5(s: &mut TcpStream, p: &url::Url, host: &str, port: u16) -> anyho
             s.read_exact(&mut reply).await?;
             anyhow::ensure!(reply[1] == 0, "the SOCKS proxy rejected the username or password");
         }
-        _ => anyhow::bail!("the SOCKS proxy wants a sign-in ytm-rs doesn't support"),
+        _ => anyhow::bail!("the SOCKS proxy wants a sign-in wasted doesn't support"),
     }
     let mut req = vec![5, 1, 0, 3, host.len() as u8];
     req.extend(host.as_bytes());

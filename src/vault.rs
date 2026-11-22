@@ -9,13 +9,13 @@
 
 use std::path::Path;
 
-const SERVICE: &str = "ytm-rs";
+const SERVICE: &str = "wasted";
 
 /// The credential names for `name`, scoped to the data folder when it isn't the
 /// default one (`YTM_DATA_DIR` dev profiles, tests), so those never share or touch
 /// the real sign-ins.
 fn key(name: &str, data_dir: &Path) -> String {
-    let default = directories::ProjectDirs::from("", "", "ytm-rs").map(|d| d.data_dir().to_path_buf());
+    let default = directories::ProjectDirs::from("", "", "wasted").map(|d| d.data_dir().to_path_buf());
     if default.as_deref() == Some(data_dir) {
         name.to_owned()
     } else {
@@ -226,7 +226,7 @@ pub fn delete(name: &str, data_dir: &Path) {
 mod tests {
     #[test]
     fn round_trip_across_chunks() {
-        let key = &format!("ytm-rs vault test {}", std::process::id());
+        let key = &format!("wasted vault test {}", std::process::id());
         for len in [0, 10, 2560, 2561, 6000, 100] {
             let secret: Vec<u8> = (0..len).map(|i| (i % 251) as u8).collect();
             super::store::set(key, &secret).unwrap();
@@ -247,7 +247,7 @@ mod stress {
             .map(|t| {
                 std::thread::spawn(move || {
                     for round in 0..15 {
-                        let key = format!("ytm-rs stress {pid} {t}");
+                        let key = format!("wasted stress {pid} {t}");
                         super::store::set(&key, &vec![7u8; 6000]).unwrap();
                         super::store::set(&key, &[7u8; 100]).unwrap();
                         assert_eq!(super::store::get(&key).unwrap().unwrap().len(), 100, "round {round}");
@@ -269,7 +269,7 @@ mod stress {
 mod unix_tests {
     #[test]
     fn round_trip_in_keyring_or_file() {
-        let dir = std::env::temp_dir().join(format!("ytm-rs-vault-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("wasted-vault-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         for len in [0, 10, 2560, 2561, 6000, 100] {
             let secret: Vec<u8> = (0..len).map(|i| (i % 251) as u8).collect();
@@ -301,7 +301,7 @@ mod unix_tests {
             eprintln!("YTM_TEST_KEYRING not set: skipped");
             return;
         }
-        let key = &format!("ytm-rs vault parts test {}", std::process::id());
+        let key = &format!("wasted vault parts test {}", std::process::id());
         let old: Vec<u8> = (0..2660).map(|i| (i % 251) as u8).collect();
         let (first, second) = old.split_at(2560);
         let part = |i| super::store::tests_entry(key, i);

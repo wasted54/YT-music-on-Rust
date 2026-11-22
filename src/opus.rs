@@ -387,7 +387,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn opus_then_aac_rate() {
-        let api = crate::ytmapi::Api::new(&std::env::temp_dir().join("ytm-rs-opus-test"));
+        let api = crate::ytmapi::Api::new(&std::env::temp_dir().join("wasted-opus-test"));
         let vd = api.visitor_data(false).await.unwrap();
         let http = reqwest::Client::new();
         let s = crate::innertube::audio_stream(&http, "zuO2fClon98", &vd, true).await.unwrap();
@@ -411,7 +411,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn opus_stream_live() {
-        let api = crate::ytmapi::Api::new(&std::env::temp_dir().join("ytm-rs-opus-test"));
+        let api = crate::ytmapi::Api::new(&std::env::temp_dir().join("wasted-opus-test"));
         let vd = api.visitor_data(false).await.unwrap();
         let http = reqwest::Client::new();
         for id in ["zuO2fClon98", "N48TFWsBA-k"] {
